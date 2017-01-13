@@ -12,7 +12,6 @@ devtools::install_github('ksavin/intrinio')
 ## Authorization
 Run `intrAuth('yourlogin', 'yourpassword')` to authorize API access.   
 Your username and password can be located in your Intrinio account under "Access Keys"
-![AccessKeys](https://s28.postimg.org/u4erhg0m5/Access_Keys.png)
 
 ## Options
 Frequently needed parameters, such as verbosity and output format can be obtained and modified with `intrOptions()`
