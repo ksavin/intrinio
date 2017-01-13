@@ -9,3 +9,7 @@
     outFormat = 'data.frame'
   ), envir = intrinio_globals)
 }
+
+.onUnload <- function(libpath){
+  suppressWarnings(rm(list = ls(envir = intrinio_globals), envir = intrinio_globals))
+}
