@@ -5,8 +5,10 @@
 #' @noRd
 #' @return returns data in specified format, determined with \code{\link{intrOptions}}
 i_Rbind <- function(x, id = NULL){
-  x <- rbindlist(x[!sapply(x, is.null)])
+  x <- rbindlist(x[!sapply(x, function(x) is.null(x) || length(x) == 0)])
   if (!is.null(id)) {
+    if (is.list(id)) id <- as.data.table(id)
+    else id <- as.data.table(list(id))
     id <- as.data.table(as.list(id))
     setnames(id, paste0('intr_id_', 1:ncol(id)))
     id[, intr_call_id := .I]

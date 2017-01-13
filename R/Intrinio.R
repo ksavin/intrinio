@@ -13,7 +13,10 @@ intr_call_l <- function(endpoint, ...) {
   }
   res <- content(response, 'text', encoding = 'UTF-8')
   if (nchar(res) == 0) stop(call_error(link, -100))
-  fromJSON(res)
+  res <- fromJSON(res)
+  if ('data' %in% names(res)) res <- res$data
+  res <- lapply(res, function(x) if(is.null(x)) return(NA) else x)
+  as.data.table(res)
 }
 
 # Multipage iterator over intr_call_l
@@ -60,9 +63,9 @@ intrCall <- function(endpoint, pageSize = 'auto', startPage = 1, endPage = NULL,
     {
       res <- intr_call_l(endpoint, page_size = pageSize, page_number = startPage, ...)
 
-      if (is.null(res$total_pages)) return(res)
-      if (is.null(endPage)) endPage <- res$total_pages
-      assert_that(endPage > startPage)
+      if(is.null(res$total_pages)) return(res)
+      if(is.null(endPage)) endPage <- res$total_pages
+      if(endPage <= startPage) return(res)
       cost <- endPage - startPage
       if (intrOptions()$costWarning && intrOptions()$warnThreshold < cost) {
         ans <- readline(
@@ -120,10 +123,10 @@ intrCallWrap <- function(endpoint, pageSize = 'auto', ..., MoreArgs = NULL) {
             lapply(vectArgs, `[`, i),
             MoreArgs)
           )
-          if (!is.null(r)){
+          if (!is.null(r) && length(r) > 0){
             if (any(sapply(r, is.list)))
-              r <- lapply(r, function(x, id) {x[['intr_call_id']] <- id; x}, i)
-            else r[['intr_call_id']] <- i
+              r <- lapply(r, function(x, id) {x[, intr_call_id := id]; x}, i)
+            else r[, intr_call_id := i]
           }
           r
           },
