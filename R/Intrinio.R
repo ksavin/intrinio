@@ -14,9 +14,9 @@ intr_call_l <- function(endpoint, ...) {
   res <- content(response, 'text', encoding = 'UTF-8')
   if (nchar(res) == 0) stop(call_error(link, -100))
   res <- fromJSON(res)
-  if ('data' %in% names(res)) res <- res$data
-  res <- lapply(res, function(x) if(is.null(x)) return(NA) else x)
-  as.data.table(res)
+  if ('data' %in% names(res)) res$data <- lapply(res$data, function(x) if (is.null(x)) return(NA) else x)
+  res <- lapply(res, function(x) if (is.null(x)) return(NA) else x)
+  res
 }
 
 # Multipage iterator over intr_call_l
@@ -24,7 +24,7 @@ intr_call_m <- function(endpoint, pageSize, startPage, endPage, pageRecover = TR
   res <- list()
   tryCatch(
     {
-      for (i in startPage:endPage){
+      for (i in startPage:endPage) {
         res[[i]] <- intr_call_l(endpoint, page_size = pageSize, page_number = i, ...)$data
       }
       res
@@ -55,7 +55,13 @@ intr_call_m <- function(endpoint, pageSize, startPage, endPage, pageRecover = TR
 #' intrCall('companies') # Pulls Master Data Feed (first page).
 #' intrCall('companies', identifier = 'AAPL')
 #' intrCall('fundamentals/standardized', identifier = 'AAPL', statement = 'income_statement', type = 'FY')
-intrCall <- function(endpoint, pageSize = 'auto', startPage = 1, endPage = NULL, pageRecover = TRUE, ...){
+intrCall <- function(endpoint,
+                     pageSize = 'auto',
+                     startPage = 1,
+                     endPage = NULL,
+                     pageRecover = TRUE,
+                     outFormat = intrOptions()$outFormat,
+                     ...){
   if (pageSize == 'auto') pageSize <- auto_page_size(endpoint)
   assert_that(is.number(pageSize) && is.number(startPage) && is.string(endpoint))
 
@@ -63,9 +69,9 @@ intrCall <- function(endpoint, pageSize = 'auto', startPage = 1, endPage = NULL,
     {
       res <- intr_call_l(endpoint, page_size = pageSize, page_number = startPage, ...)
 
-      if(is.null(res$total_pages)) return(res)
-      if(is.null(endPage)) endPage <- res$total_pages
-      if(endPage <= startPage) return(res)
+      if (is.null(res$total_pages)) return(as.data.table(res))
+      if (is.null(endPage)) endPage <- res$total_pages
+      if (endPage <= startPage) return(as.data.table(res$data))
       cost <- endPage - startPage
       if (intrOptions()$costWarning && intrOptions()$warnThreshold < cost) {
         ans <- readline(
@@ -73,8 +79,8 @@ intrCall <- function(endpoint, pageSize = 'auto', startPage = 1, endPage = NULL,
                 'API credits. Run intrOptions(costWarning = FALSE) to disable this warning. Proceed (y/n)? '))
         if (!ans %in% c('Y', 'y')) return(NULL)
       }
-      res <- list(res$data)
-      c(res, intr_call_m(endpoint, pageSize, startPage + 1, endPage, pageRecover, ...))
+      res <- c(list(res$data), intr_call_m(endpoint, pageSize, startPage + 1, endPage, pageRecover, ...))
+      intrRbind(res, outFormat = outFormat)
     },
     skip_request = function(e) {
       if (intrOptions()$verbose)
@@ -97,9 +103,10 @@ intrCall <- function(endpoint, pageSize = 'auto', startPage = 1, endPage = NULL,
 #' Must be vectors of the same length with names corresponding to Intrinio API queries
 #' @param MoreArgs A named list of other parameters to pass to \code{intrCall}.
 #' Elements of MoreArgs must be vectors of length 1
-intrCallWrap <- function(endpoint, pageSize = 'auto', ..., MoreArgs = NULL) {
+intrCallMap <- function(endpoint, pageSize = 'auto', idCols = TRUE, ..., MoreArgs = NULL) {
   vectArgs <- list(...)
-  if (length(vectArgs) == 0) stop('Nothing to vectorize over. Please use intrCall for single requests directly')
+  idCols <- if (idCols) vectArgs else NULL
+  if (length(vectArgs) == 0) stop('Nothing to interate over. Please use intrCall for single requests directly')
   if (!all(sapply(vectArgs, is.vector))) stop('All arguments in ... must be vectors')
   if (length(unique(sapply(vectArgs, length))) > 1) stop('All vectors in ... must have the same length')
   if (!is.null(MoreArgs)) {
@@ -119,11 +126,12 @@ intrCallWrap <- function(endpoint, pageSize = 'auto', ..., MoreArgs = NULL) {
               endpoint = endpoint,
               pageSize = pageSize,
               startPage = 1,
+              outFormat = 'data.table',
               pageRecover = FALSE),
             lapply(vectArgs, `[`, i),
             MoreArgs)
           )
-          if (!is.null(r) && length(r) > 0){
+          if (!is.null(r) && length(r) > 0) {
             if (any(sapply(r, is.list)))
               r <- lapply(r, function(x, id) {x[, intr_call_id := id]; x}, i)
             else r[, intr_call_id := i]
@@ -154,11 +162,11 @@ intrCallWrap <- function(endpoint, pageSize = 'auto', ..., MoreArgs = NULL) {
       warning(paste0('---\nLoading encountered an error and had to be interrupted.',
                      ' Returned successfully loaded results.\n',
                      response$message, '\n---'))
-      return(res)
+      return(intrRbind(res, id = idCols))
     }
     res[[i]] <- response
   }
-  res
+  intrRbind(res, id = idCols)
 }
 
 #' @title Authorize Web API access

@@ -10,14 +10,14 @@
 i.securities <- function(tickers = NULL, exchange = NULL, ...){
   if (!is.null(tickers)) {
     if (is.null(exchange))
-      return(i_Rbind(intrCallWrap('securities', identifier = tickers, ...)))
+      return(intrCallMap('securities', identifier = tickers, idCols = FALSE, ...))
     if (length(exchange) == 1)
-      return(i_Rbind(intrCallWrap('securities', identifier = tickers,
-                                  MoreArgs = c(list(exch_symbol = exchange), list(...)))))
+      return(intrCallMap('securities', identifier = tickers, idCOls = FALSE,
+                          MoreArgs = c(list(exch_symbol = exchange), list(...))))
     if (length(tickers) != length(exchange))
       stop('If multiple exchanges specified, their length must match corresponding tickers length')
-    return(intrCallWrap('securities', identifier = tickers, exch_symbol = exchange, MoreArgs = list(...)))
+    return(intrCallMap('securities', identifier = tickers, exch_symbol = exchange, idCols = FALSE, MoreArgs = list(...)))
   }
-  i_Rbind(intrCall('securities', exch_symbol = exchange, ...))
+  intrCall('securities', exch_symbol = exchange, ...)
 }
 

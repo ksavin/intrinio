@@ -1,6 +1,6 @@
 export(intrAuth)
 export(intrCall)
-export(intrCallWrap)
+export(intrCallMap)
 export(intrOptions)
 
 export(i.securities)
