@@ -67,4 +67,4 @@ IS <- intrCallMap('financials/standardized',
                    MoreArgs = list(statement = 'income_statement', fiscal_period = 'FY'))
                        
 ```
-See [API documentaion](http://docs.intrinio.com/) for the list of abailable endpoints and queries.
+See [API documentaion](http://docs.intrinio.com/) for the list of available endpoints and queries.
