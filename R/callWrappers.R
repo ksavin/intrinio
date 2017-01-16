@@ -4,7 +4,7 @@
 #' @param exchange A string or a character vector of the same length as tickers (if specified) containing exchange(s)
 #' @details Calling \code{i.securities()} without any arguments will return master data feed (a data.frame with all tickers)\cr
 #' Passing a vector of tickers will return more detailed data on securities
-#' @note  Master data feed took ~500 at the time of writing
+#' @note  Master data feed took ~500 API credits to load at the time of writing
 #' @return Data in specified format. See \code{\link{intrOptions}} for details
 #' @seealso \href{http://docs.intrinio.com/#securities}{Securities API documentation}.
 i.securities <- function(tickers = NULL, exchange = NULL, ...){

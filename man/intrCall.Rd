@@ -5,7 +5,7 @@
 \title{Generic Intrinio API call with multi-page results}
 \usage{
 intrCall(endpoint, pageSize = "auto", startPage = 1, endPage = NULL,
-  pageRecover = TRUE, ...)
+  pageRecover = TRUE, outFormat = intrOptions()$outFormat, ...)
 }
 \arguments{
 \item{endpoint}{Name of an endpoint, such as 'companies', 'securities', 'indices', 'owners' or 'stock_exchanges'.

@@ -99,16 +99,21 @@ intrCall <- function(endpoint,
 #' See \href{docs.intrinio.com}{API documentation}. May have a composite name, e.g. \code{'fundamentals/standardized'}
 #' @param pageSize Page size for results. If set to \code{'auto'} will use the largest size allowed for the endpoint.
 #' See \href{http://docs.intrinio.com/#paging-limits}{Paging Limits} or \code{intrOptions()$maxPageSize}
+#' @param idCols A single-element logical. If TRUE, will add a vectors from (...)
+#' to the resulting data. FALSE is typically needed when the data loaded already contains ID columns
+#' @param combine A single-element integer no less than 1.
+#' In \href{http://docs.intrinio.com/#company-sec-filings}{some cases}
+#' it is allowed to request multiple tickers at once to save API credits. If \code{combine} is set to 10,
+#' data will be requested in a chunks of size 10.
 #' @param ... Arguments to iterate over similar to how \code{mapply} does it.
 #' Must be vectors of the same length with names corresponding to Intrinio API queries
-#' @param MoreArgs A named list of other parameters to pass to \code{intrCall}.
+#' @param MoreArgs A named list of other constant queries to pass to \code{intrCall}.
 #' Elements of MoreArgs must be vectors of length 1
-intrCallMap <- function(endpoint, pageSize = 'auto', idCols = TRUE, ..., MoreArgs = NULL) {
+intrCallMap <- function(endpoint, pageSize = 'auto', idCols = TRUE, combine = 1L, ..., MoreArgs = NULL) {
   vectArgs <- list(...)
   idCols <- if (idCols) vectArgs else NULL
-  if (length(vectArgs) == 0) stop('Nothing to interate over. Please use intrCall for single requests directly')
-  if (!all(sapply(vectArgs, is.vector))) stop('All arguments in ... must be vectors')
-  if (length(unique(sapply(vectArgs, length))) > 1) stop('All vectors in ... must have the same length')
+
+  # check that MoreArgs is a named list containing single-element vectors
   if (!is.null(MoreArgs)) {
     assert_that(is.list(MoreArgs),
                 !is.null(names(MoreArgs)),
@@ -116,10 +121,32 @@ intrCallMap <- function(endpoint, pageSize = 'auto', idCols = TRUE, ..., MoreArg
                 all(sapply(MoreArgs, is.vector)),
                 all(sapply(MoreArgs, length) == 1))
   }
-  res <- list()
+
+  # if (...) is empty, simply call intrCall
+  if (length(vectArgs) == 0) {
+    return(
+      do.call(intrCall, args = c(
+        list(endPoint = endpoint, pageSize = pageSize, startPage = 1), MoreArgs))
+    )
+  }
+
+  # Verify that (...) consists of vectors of the same length
+  if (!all(sapply(vectArgs, is.vector))) stop('All arguments in ... must be vectors')
+  if (length(unique(sapply(vectArgs, length))) > 1) stop('All vectors in ... must have the same length')
+
+  if (combine != 1L) {
+    assert_that(is.integer(combine), length(combine) == 1, combine > 1)
+    vectArgs <- lapply(vectArgs, function(x, size) {
+      tbl <- data.table(x = x, chunk = 1:length(x) %/% size)[, .(x = paste0(x, collapse = ',')), chunk]
+      tbl$x
+    }, combine)
+  }
+
+  res <- list() # output variable
   for (i in 1:length(vectArgs[[1]])) {
     response <-
       tryCatch({
+
         withCallingHandlers({
           r <- do.call(intrCall, args = c(
             list(
@@ -137,16 +164,20 @@ intrCallMap <- function(endpoint, pageSize = 'auto', idCols = TRUE, ..., MoreArg
             else r[, intr_call_id := i]
           }
           r
-          },
-          call_error = function(e){
-            switch(
-              e$name,
-              resultEmpty = invokeRestart(findRestart("skip_request"), e),
-              stop(e)
-            )
-          }
-        )
+        },
+
+        # if intrCall fails with empty results ask it to return null, otherwise fail
+        call_error = function(e) {
+          switch(
+            e$name,
+            resultEmpty = invokeRestart(findRestart("skip_request"), e),
+            stop(e)
+          )
+        })
+
       },
+
+      # Return error object in case of exceeding limit or server failure. Fail otherwise
       call_error = function(e){
         switch(
           e$name,
@@ -154,9 +185,13 @@ intrCallMap <- function(endpoint, pageSize = 'auto', idCols = TRUE, ..., MoreArg
           notFound = stop(e),
           limit = e,
           serverError = e,
-          unavailable = e
+          unavailable = e,
+          stop(e)
         )
       })
+
+    # If error object returned, check if anything is loaded.
+    # If yes, return loaded data with warning, fail otherwise
     if (inherits(response, 'error')) {
       if (i == 1 || all(sapply(res, is.null))) stop(response)
       warning(paste0('---\nLoading encountered an error and had to be interrupted.',
@@ -166,7 +201,8 @@ intrCallMap <- function(endpoint, pageSize = 'auto', idCols = TRUE, ..., MoreArg
     }
     res[[i]] <- response
   }
-  intrRbind(res, id = idCols)
+
+  intrRbind(res, id = idCols) # Rbind list into table, convert to format specified
 }
 
 #' @title Authorize Web API access
