@@ -101,15 +101,11 @@ intrCall <- function(endpoint,
 #' See \href{http://docs.intrinio.com/#paging-limits}{Paging Limits} or \code{intrOptions()$maxPageSize}
 #' @param idCols A single-element logical. If TRUE, will add a vectors from (...)
 #' to the resulting data. FALSE is typically needed when the data loaded already contains ID columns
-#' @param combine A single-element integer no less than 1.
-#' In \href{http://docs.intrinio.com/#company-sec-filings}{some cases}
-#' it is allowed to request multiple tickers at once to save API credits. If \code{combine} is set to 10,
-#' data will be requested in a chunks of size 10.
 #' @param ... Arguments to iterate over similar to how \code{mapply} does it.
 #' Must be vectors of the same length with names corresponding to Intrinio API queries
 #' @param MoreArgs A named list of other constant queries to pass to \code{intrCall}.
 #' Elements of MoreArgs must be vectors of length 1
-intrCallMap <- function(endpoint, pageSize = 'auto', idCols = TRUE, combine = 1L, ..., MoreArgs = NULL) {
+intrCallMap <- function(endpoint, pageSize = 'auto', idCols = TRUE, ..., MoreArgs = NULL) {
   vectArgs <- list(...)
   idCols <- if (idCols) vectArgs else NULL
 
@@ -134,13 +130,13 @@ intrCallMap <- function(endpoint, pageSize = 'auto', idCols = TRUE, combine = 1L
   if (!all(sapply(vectArgs, is.vector))) stop('All arguments in ... must be vectors')
   if (length(unique(sapply(vectArgs, length))) > 1) stop('All vectors in ... must have the same length')
 
-  if (combine != 1L) {
-    assert_that(is.integer(combine), length(combine) == 1, combine > 1)
-    vectArgs <- lapply(vectArgs, function(x, size) {
-      tbl <- data.table(x = x, chunk = 1:length(x) %/% size)[, .(x = paste0(x, collapse = ',')), chunk]
-      tbl$x
-    }, combine)
-  }
+  # if (combine != 1L) {
+  #   assert_that(is.integer(combine), length(combine) == 1, combine > 1)
+  #   vectArgs <- lapply(vectArgs, function(x, size) {
+  #     tbl <- data.table(x = x, chunk = 1:length(x) %/% size)[, .(x = paste0(x, collapse = ',')), chunk]
+  #     tbl$x
+  #   }, combine)
+  # }
 
   res <- list() # output variable
   for (i in 1:length(vectArgs[[1]])) {
