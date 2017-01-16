@@ -4,7 +4,7 @@
 #' @param id A vector or list with id columns. Use only together with \code{intrCallWrap}.
 #' @return returns data in specified format, determined with \code{\link{intrOptions}}
 intrRbind <- function(x, id = NULL, outFormat = intrOptions()$outFormat){
-  x <- rbindlist(x[!sapply(x, function(x) is.null(x) || length(x) == 0)])
+  x <- rbindlist(x[!sapply(x, function(x) is.null(x) || length(x) == 0)], fill = TRUE)
   if (!is.null(id)) {
     id <- as.data.table(id)
     id[, intr_call_id := .I]
