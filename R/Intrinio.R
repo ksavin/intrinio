@@ -107,10 +107,11 @@ intrCall <- function(endpoint,
 #' Elements of MoreArgs must be vectors of length 1
 intrCallMap <- function(endpoint, pageSize = 'auto', idCols = TRUE, ..., MoreArgs = NULL) {
   vectArgs <- list(...)
+  vectArgs <- vectArgs[!sapply(vectArgs, is.null)]
   idCols <- if (idCols) vectArgs else NULL
 
   # check that MoreArgs is a named list containing single-element vectors
-  if (!is.null(MoreArgs)) {
+  if (!is.null(MoreArgs) && length(MoreArgs) > 0) {
     assert_that(is.list(MoreArgs),
                 !is.null(names(MoreArgs)),
                 all(nchar(names(MoreArgs)) > 0),
@@ -122,7 +123,7 @@ intrCallMap <- function(endpoint, pageSize = 'auto', idCols = TRUE, ..., MoreArg
   if (length(vectArgs) == 0) {
     return(
       do.call(intrCall, args = c(
-        list(endPoint = endpoint, pageSize = pageSize, startPage = 1), MoreArgs))
+        list(endpoint = endpoint, pageSize = pageSize, startPage = 1), MoreArgs))
     )
   }
 

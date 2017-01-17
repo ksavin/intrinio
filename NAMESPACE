@@ -4,6 +4,8 @@ export(intrCallMap)
 export(intrOptions)
 
 export(i.securities)
+export(i.companies)
+export(i.indices)
 
 importFrom(httr, modify_url)
 importFrom(httr, VERB)

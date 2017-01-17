@@ -4,7 +4,7 @@
 \alias{intrCallMap}
 \title{A multi-request wrapper around intrCall}
 \usage{
-intrCallMap(endpoint, pageSize = "auto", idCols = TRUE, combine = 1L, ...,
+intrCallMap(endpoint, pageSize = "auto", idCols = TRUE, ...,
   MoreArgs = NULL)
 }
 \arguments{
@@ -16,11 +16,6 @@ See \href{http://docs.intrinio.com/#paging-limits}{Paging Limits} or \code{intrO
 
 \item{idCols}{A single-element logical. If TRUE, will add a vectors from (...)
 to the resulting data. FALSE is typically needed when the data loaded already contains ID columns}
-
-\item{combine}{A single-element integer no less than 1.
-In \href{http://docs.intrinio.com/#company-sec-filings}{some cases}
-it is allowed to request multiple tickers at once to save API credits. If \code{combine} is set to 10,
-data will be requested in a chunks of size 10.}
 
 \item{...}{Arguments to iterate over similar to how \code{mapply} does it.
 Must be vectors of the same length with names corresponding to Intrinio API queries}

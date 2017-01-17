@@ -10,6 +10,8 @@ i.securities(tickers = NULL, exchange = NULL, ...)
 \item{tickers}{A character vector of stock symbols to load detailed data on.}
 
 \item{exchange}{A string or a character vector of the same length as tickers (if specified) containing exchange(s)}
+
+\item{...}{other arguments to pass to \code{MoreArgs} of \code{intrCallMap}}
 }
 \value{
 Data in specified format. See \code{\link{intrOptions}} for details
@@ -22,7 +24,13 @@ Calling \code{i.securities()} without any arguments will return master data feed
 Passing a vector of tickers will return more detailed data on securities
 }
 \note{
-Master data feed took ~500 at the time of writing
+Master data feed took ~500 API credits to load at the time of writing
+}
+\examples{
+\dontrun{
+i.securities() #Over 500 API calls
+i.securities(tickers = c('AAPL', 'MSFT'))
+}
 }
 \seealso{
 \href{http://docs.intrinio.com/#securities}{Securities API documentation}.
