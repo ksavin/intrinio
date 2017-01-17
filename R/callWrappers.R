@@ -72,3 +72,17 @@ i.indices <- function(tickers = NULL, type = NULL, ...){
   }
   intrCallMap('indices', identifier = tickers, type = type, idCols = FALSE, MoreArgs = list(...))
 }
+
+#' Securities Search/Screener
+#' @description Returns information on securities that matches passed conditions
+#' @param ...
+#' @param asis
+#' @noRd
+#' @return
+#' @export
+#'
+#' @examples
+i.secScreener <- function(..., asis = FALSE){
+  fCall <- as.list(match.call(expand.dots = TRUE))
+  if (length(fCall) <= 1) stop('Must define at least 1 condition')
+}
