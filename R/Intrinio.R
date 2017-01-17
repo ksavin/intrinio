@@ -284,8 +284,8 @@ base_url <- function(){
 auto_page_size <- function(endpoint) {
   mysub <- function(re, x) sub(re, "", x, perl = TRUE)
   endpoint <- mysub("[\\/]+$", mysub("^[\\/]+", endpoint))
-  size <- maxPages[maxPages$endpoint == endpoint, 'size']
-  if (length(size) == 0) size <- maxPages[maxPages$endpoint == 'else', 'size']
+  size <- maxPages[endpoint == endpoint, size]
+  if (length(size) == 0) size <- maxPages[endpoint == 'else', size]
   size
 }
 
@@ -300,9 +300,9 @@ condition <- function(subclass, message, call = sys.call(-1), ...) {
 # Custom error constructor for API call errors
 call_error <- function(request, errCode) {
   if (errCode %in% errCodes$code) {
-    #errCodes is a data.frame in sysdata.rda
-    description <- errCodes[errCodes$code == errCode, 'description']
-    errName <- errCodes[errCodes$code == errCode, 'name']
+    #errCodes is a data.table in sysdata.rda
+    description <- errCodes[code == errCode, description]
+    errName <- errCodes[code == errCode, name]
   } else description <- 'Unknown error code'
   msg <- paste0('Failed to load: ', request, '\nError ', errCode, ': ', description)
   condition(c("call_error", "error"),

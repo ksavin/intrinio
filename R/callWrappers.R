@@ -83,6 +83,38 @@ i.indices <- function(tickers = NULL, type = NULL, ...){
 #'
 #' @examples
 i.secScreener <- function(..., asis = FALSE){
-  fCall <- as.list(match.call(expand.dots = TRUE))
-  if (length(fCall) <= 1) stop('Must define at least 1 condition')
+  in.fCall <- as.list(match.call(expand.dots = TRUE))
+  if (any(names(in.fCall) == 'asis'))
+    in.fCall <- in.fCall[names(in.fCall) != 'asis']
+  in.fCall <- in.fCall[-1]
+  if (length(in.fCall) < 1) stop('Must define at least 1 condition')
+  q <- screenQuery(in.fCall)
+  q
+}
+
+# makes screening query from expression list
+# evil code warning
+screenQuery <- function(in.exprList) {
+  in.opRegex <- paste0('\\s', paste0(iOperators$r, collapse = '|'), '\\s')
+
+  in.exStr <- sapply(in.exprList, deparse)
+  in.dataTags <- sapply(in.exStr, `[`, 1)
+  in.operators <- sapply(in.exStr, `[`, 2)
+  in.operators_parsed <- iOperators[in.operators, i, on = 'r']
+
+  if (any(is.na(in.operators_parsed)))
+    stop(paste0('Unrecognized or unsupported operators: ',
+                paste0(in.operators[is.na(in.operators_parsed)], collapse = ', ')))
+
+  in.values <- sapply(in.exStr, `[`, 3)
+  in.values <- sapply(in.values, function(x){
+    valParsed <- try(eval(parse(text = x)), silent = TRUE)
+    if (!inherits(valParsed, 'try-error') &&
+        is.vector(valParsed) &&
+        length(valParsed) == 1)
+      return(as.character(valParsed))
+    x
+  })
+  query <- paste0(in.dataTags, in.operators_parsed, in.values, collapse = ',')
+  query
 }
