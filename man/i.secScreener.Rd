@@ -44,8 +44,8 @@ i.secScreener(literal = 'open_price~gte~10.50,pricetoearnings~gt~10') #Same
 #Same results with executable code on right-hand side
 a <- 10
 b <- 0.5
-c <- 100
-i.secScreener(open_price >= a + b, pricetoearnings > sqrt(c))
+sq <- 100
+i.secScreener(open_price >= a + b, pricetoearnings > sqrt(sq))
 }
 }
 
