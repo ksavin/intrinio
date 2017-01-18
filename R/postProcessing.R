@@ -10,8 +10,8 @@ intrRbind <- function(x, id = NULL, outFormat = intrOptions()$outFormat){
     id <- as.data.table(id)
     id[, intr_call_id := .I]
     x <- id[x, on = 'intr_call_id']
+    x$intr_call_id <- NULL
   }
-  x$intr_call_id <- NULL
   return(i_convert(x, outFormat))
 }
 

@@ -6,6 +6,7 @@ export(intrOptions)
 export(i.securities)
 export(i.companies)
 export(i.indices)
+export(i.secScreener)
 
 importFrom(httr, modify_url)
 importFrom(httr, VERB)

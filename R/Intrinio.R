@@ -155,7 +155,7 @@ intrCallMap <- function(endpoint, pageSize = 'auto', idCols = TRUE, ..., MoreArg
             lapply(vectArgs, `[`, i),
             MoreArgs)
           )
-          if (!is.null(r) && length(r) > 0) {
+          if (!is.null(r) && length(r) > 0 && !is.null(idCols)) {
             if (any(sapply(r, is.list)))
               r <- lapply(r, function(x, id) {x[, intr_call_id := id]; x}, i)
             else r[, intr_call_id := i]
@@ -283,8 +283,8 @@ base_url <- function(){
 # Gets a maximum allowed page size for an endpoint (values are stored locally)
 auto_page_size <- function(endpoint) {
   mysub <- function(re, x) sub(re, "", x, perl = TRUE)
-  endpoint <- mysub("[\\/]+$", mysub("^[\\/]+", endpoint))
-  size <- maxPages[endpoint == endpoint, size]
+  ep <- mysub("[\\/]+$", mysub("^[\\/]+", endpoint))
+  size <- maxPages[endpoint == ep, size]
   if (length(size) == 0) size <- maxPages[endpoint == 'else', size]
   size
 }

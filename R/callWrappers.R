@@ -75,38 +75,67 @@ i.indices <- function(tickers = NULL, type = NULL, ...){
 
 #' Securities Search/Screener
 #' @description Returns information on securities that matches passed conditions
-#' @param ...
-#' @param asis
-#' @noRd
-#' @return
-#' @export
-#'
+#' @param ... Any number of unquoted conditions.
+#' Each condition should contain a \href{http://docs.intrinio.com/tags/intrinio-public#data-point}{data point tag} a data tag
+#' on its left-hand side, a value or expression on a right-hand side and allowed operator in-between.
+#' @param literal A string with intrinio-formatted conditions.
+#' If not NULL, will ignore parameters and  pass literal instead.
+#' Recommended when \code{i.secScreener} is used in scripts.
+#' @details Currenly the following operators are available:
+#' \describe{
+#'   \item{\code{==}}{Equal}
+#'   \item{\code{>=}}{Greater or equal}
+#'   \item{\code{<=}}{Less or equal}
+#'   \item{\code{>}}{Greater}
+#'   \item{\code{<}}{Less}
+#'   \item{\code{ \%contains\% }}{Contains text}
+#' }\cr
+#' Right-hand side of condition should be either a value, a function call or an expression.
+#' Data tags on the right-hand side are not supported by API.\cr
+#' Parser will attempt to evaluate the right-hand side and in case of a failure will consider it a string literal.\cr
+#' Left-hand side is not evaluated.
+#' @return Data in specified format. See \code{\link{intrOptions}} for details
 #' @examples
-i.secScreener <- function(..., asis = FALSE){
+#' #' \dontrun{
+#' i.secScreener(open_price >= 10.50, pricetoearnings > 10)
+#' i.secScreener(literal = 'open_price~gte~10.50,pricetoearnings~gt~10') #Same
+#'
+#' #Same results with executable code on right-hand side
+#' a <- 10
+#' b <- 0.5
+#' sq <- 100
+#' i.secScreener(open_price >= a + b, pricetoearnings > sqrt(sq))
+#' }
+i.secScreener <- function(..., literal = NULL) {
   in.fCall <- as.list(match.call(expand.dots = TRUE))
-  if (any(names(in.fCall) == 'asis'))
-    in.fCall <- in.fCall[names(in.fCall) != 'asis']
+  if (!is.null(literal)){
+    assert_that(is.string(literal))
+    return(intrCall(endpoint = 'securities/search', conditions = literal))
+  }
+  if (any(names(in.fCall) == 'literal'))
+    in.fCall <- in.fCall[names(in.fCall) != 'literal']
   in.fCall <- in.fCall[-1]
   if (length(in.fCall) < 1) stop('Must define at least 1 condition')
   q <- screenQuery(in.fCall)
-  q
+  intrCall(endpoint = 'securities/search', conditions = q)
 }
 
-# makes screening query from expression list
-# evil code warning
+# makes screening query from expression list.
+# Evil code warning
 screenQuery <- function(in.exprList) {
-  in.opRegex <- paste0('\\s', paste0(iOperators$r, collapse = '|'), '\\s')
-
-  in.exStr <- sapply(in.exprList, deparse)
-  in.dataTags <- sapply(in.exStr, `[`, 1)
-  in.operators <- sapply(in.exStr, `[`, 2)
+  in.chExp <- lapply(in.exprList, as.character)
+  lapply(in.chExp, function(x)
+    if (length(x) != 3) stop(paste0('Could not parse condition: ', paste(x, collapse = ' ')))
+  )
+  in.operators <- sapply(in.chExp, `[`, 1)
   in.operators_parsed <- iOperators[in.operators, i, on = 'r']
-
   if (any(is.na(in.operators_parsed)))
     stop(paste0('Unrecognized or unsupported operators: ',
                 paste0(in.operators[is.na(in.operators_parsed)], collapse = ', ')))
+  in.dataTags <- sapply(in.chExp, `[`, 2)
 
-  in.values <- sapply(in.exStr, `[`, 3)
+  in.values <- sapply(in.chExp, `[`, 3)
+
   in.values <- sapply(in.values, function(x){
     valParsed <- try(eval(parse(text = x)), silent = TRUE)
     if (!inherits(valParsed, 'try-error') &&
