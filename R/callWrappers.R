@@ -1,12 +1,13 @@
 #' Load list of securities and their details
-#'
+#' @description Pulls a list of securities available in [U.S. Public Company Data Feed] via Intrinio API
 #' @param tickers A character vector of stock symbols to load detailed data on.
 #' @param exchange A string or a character vector of the same length as tickers (if specified) containing exchange(s)
 #' @param ... other arguments to pass to \code{MoreArgs} of \code{intrCallMap}
 #' @details Calling \code{i.securities()} without any arguments will return master data feed (a data.frame with all tickers)\cr
 #' Passing a vector of tickers will return more detailed data on securities
-#' @note  Master data feed took ~500 API credits to load at the time of writing
 #' @return Data in specified format. See \code{\link{intrOptions}} for details
+#' @section Data Feed:
+#' \href{https://intrinio.com/data/company-security-master}{Global Public Company Security Master}
 #' @seealso \href{http://docs.intrinio.com/#securities}{Securities API documentation}.
 #' @examples
 #' \dontrun{
@@ -35,6 +36,8 @@ i.securities <- function(tickers = NULL, exchange = NULL, ...){
 #' @details This query will return companies available at intrinio with detailed information,
 #' such as hq address, phone number, industry sector, SEC cik number etc.
 #' @return Data in specified format. See \code{\link{intrOptions}} for details
+#' @section Data Feed:
+#' {https://intrinio.com/data/company-financials}{US Public Company Financials}
 #' @examples
 #' \dontrun{
 #' i.companies()
@@ -54,6 +57,8 @@ i.companies <- function(tickers = NULL, ...){
 #' @details This query will return indices available at intrinio with detailed information,
 #' such as country, continent, full name and type.
 #' @return Data in specified format. See \code{\link{intrOptions}} for details
+#' @section Data Feed:
+#' \href{https://intrinio.com/data/company-security-master}{Global Public Company Security Master}
 #' @seealso \href{http://docs.intrinio.com/#indices58}{Indices API documentation}.
 #' @examples
 #' \dontrun{
@@ -95,6 +100,8 @@ i.indices <- function(tickers = NULL, type = NULL, ...){
 #' Parser will attempt to evaluate the right-hand side and in case of a failure will consider it a string literal.\cr
 #' Left-hand side is not evaluated.
 #' @return Data in specified format. See \code{\link{intrOptions}} for details
+#' @section Data Feed:
+#' {https://intrinio.com/data/company-financials}{US Public Company Financials}
 #' @examples
 #' #' \dontrun{
 #' i.secScreener(open_price >= 10.50, pricetoearnings > 10)
@@ -108,7 +115,7 @@ i.indices <- function(tickers = NULL, type = NULL, ...){
 #' }
 i.secScreener <- function(..., literal = NULL) {
   in.fCall <- as.list(match.call(expand.dots = TRUE))
-  if (!is.null(literal)){
+  if (!is.null(literal)) {
     assert_that(is.string(literal))
     return(intrCall(endpoint = 'securities/search', conditions = literal))
   }
@@ -146,4 +153,31 @@ screenQuery <- function(in.exprList) {
   })
   query <- paste0(in.dataTags, in.operators_parsed, in.values, collapse = ',')
   query
+}
+
+
+#' Most recent data point
+#' @description Returns the most recent data point (such as P/E, price, financial) for selected identifier(s)
+#' (ticker symbol, stock market index symbol, CIK ID, etc.) for selected tag(s).
+#' @param tickers A character vector of stock symbols (or other eligible identifiers, such as CIK number)
+#' to load detailed data on.
+#' @param tags A character vector of stock symbols to load detailed data on.
+#' Entire tag list is available \href{http://docs.intrinio.com/tags/intrinio-public#data-point}{here}
+#' @param ... other arguments to pass to \code{MoreArgs} of \code{intrCallMap}
+#' @details API allows requesting up to 150 identifier/tah combinations at a time.
+#' E.g. 1 identifier and 150 items, or 150 identifiers and 1 tag, or 12 identifiers and 12 tags (144 combinations).
+#' This function automatically makes multiple requests if API limits are not met, attempting to minimize number of calls.
+#' It is assumed that you need \emph{all} data tags specified for every ticker specified,
+#' so do not pass duplicate tickers or tags.
+#' @return Data in specified format. See \code{\link{intrOptions}} for details
+#' @section Data Feed:
+#' \href{https://intrinio.com/data/company-financials}{US Public Company Financials}
+#' @seealso \href{http://docs.intrinio.com/#data-point}{Data Point documentation}.
+#' @examples
+#' @noRd
+#' \dontrun{
+#' i.dataPoint(tickers = c('AAPL', 'MSFT), tags = c('pricetoearnings', 'totalrevenue'))
+#' }
+i.dataPoint <- function(tickers, tags, ...){
+
 }

@@ -23,6 +23,10 @@ Return available indices
 This query will return indices available at intrinio with detailed information,
 such as country, continent, full name and type.
 }
+\section{Data Feed}{
+
+\href{https://intrinio.com/data/company-security-master}{Global Public Company Security Master}
+}
 \examples{
 \dontrun{
 i.indices() # over 1000 API calls

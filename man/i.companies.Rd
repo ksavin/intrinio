@@ -22,6 +22,10 @@ Loads Information about companies
 This query will return companies available at intrinio with detailed information,
 such as hq address, phone number, industry sector, SEC cik number etc.
 }
+\section{Data Feed}{
+
+{https://intrinio.com/data/company-financials}{US Public Company Financials}
+}
 \examples{
 \dontrun{
 i.companies()

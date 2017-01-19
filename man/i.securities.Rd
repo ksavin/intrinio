@@ -17,14 +17,15 @@ i.securities(tickers = NULL, exchange = NULL, ...)
 Data in specified format. See \code{\link{intrOptions}} for details
 }
 \description{
-Load list of securities and their details
+Pulls a list of securities available in [U.S. Public Company Data Feed] via Intrinio API
 }
 \details{
 Calling \code{i.securities()} without any arguments will return master data feed (a data.frame with all tickers)\cr
 Passing a vector of tickers will return more detailed data on securities
 }
-\note{
-Master data feed took ~500 API credits to load at the time of writing
+\section{Data Feed}{
+
+\href{https://intrinio.com/data/company-security-master}{Global Public Company Security Master}
 }
 \examples{
 \dontrun{

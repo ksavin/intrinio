@@ -36,6 +36,10 @@ Data tags on the right-hand side are not supported by API.\cr
 Parser will attempt to evaluate the right-hand side and in case of a failure will consider it a string literal.\cr
 Left-hand side is not evaluated.
 }
+\section{Data Feed}{
+
+{https://intrinio.com/data/company-financials}{US Public Company Financials}
+}
 \examples{
 #' \dontrun{
 i.secScreener(open_price >= 10.50, pricetoearnings > 10)
