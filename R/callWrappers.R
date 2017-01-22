@@ -181,3 +181,5 @@ screenQuery <- function(in.exprList) {
 i.dataPoint <- function(tickers, tags, ...){
 
 }
+
+
