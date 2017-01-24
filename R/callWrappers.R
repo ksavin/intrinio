@@ -173,13 +173,53 @@ screenQuery <- function(in.exprList) {
 #' @section Data Feed:
 #' \href{https://intrinio.com/data/company-financials}{US Public Company Financials}
 #' @seealso \href{http://docs.intrinio.com/#data-point}{Data Point documentation}.
-#' @examples
 #' @noRd
-#' \dontrun{
+#' @examples
+#'#' \dontrun{
 #' i.dataPoint(tickers = c('AAPL', 'MSFT), tags = c('pricetoearnings', 'totalrevenue'))
 #' }
 i.dataPoint <- function(tickers, tags, ...){
 
 }
 
+#' Historical data
+#'
+#' @param tickers tickers A character vector of stock symbols.
+#' For non-US tickers it is possible to pass specify exchange after tick symbol, separated by comma, i.e. "TICKER:EXCHANGE"
+#' @param tags he specified standardized tag requested.
+#' Entire list of tags is available \href{http://docs.intrinio.com/tags/intrinio-public#historical-data}{here}
+#' @param from History start date (either Date or a character in 'YYYY-MM-DD' format),
+#' If \code{NULL}, date would not be restricted by a minimum.
+#' @param to History end date (either Date or a character in 'YYYY-MM-DD' format),
+#' If \code{NULL}, date would not be restricted by a maximum.
+#' @param freq Data periodicity. A string containing any of
+#' \code{'daily', 'weekly', 'monthly', 'quarterly', 'yearly'}
+#' @param type Meaningful for financial Statements data only. The type of periods requested. Possible values:\cr
+#' \describe{
+#'   \item{\code{'FY'}}{Fiscal year}
+#'   \item{\code{'QTR'}}{Quarter}
+#'   \item{\code{'YTD'}}{Year-to-date}
+#'   \item{\code{'TTM'}}{Trailing twelve months}
+#' }\cr
+#' @param ... other arguments to pass to \code{MoreArgs} of \code{intrCallMap}
+#' @details Will download history for all tickers passed for each tag passed.
+#' Please use \code{intrCallMap} to load specific set of tags for the respective ticker.
+#' @return Data in specified format. See \code{\link{intrOptions}} for details
+#' @section Data Feed:
+#' \href{https://intrinio.com/data/company-financials}{US Public Company Financials}
+#' @noRd
+#' @examples
+i.historicalData <- function(tickers,
+                             tags,
+                             from = NULL,
+                             to = NULL,
+                             freq = c('daily', 'weekly', 'monthly', 'quarterly', 'yearly'),
+                             type = NULL,
+                             ...){
+  freq <- match.arg(freq)
+  assert_that(is.character(tickers),
+              is.character(tags),
+              is.string(type),
+              type %in% c('FY', 'QTR', 'QTD', 'TTM'))
 
+}
