@@ -185,13 +185,15 @@ i.dataPoint <- function(tickers, tags, ...){
 #' Historical data
 #'
 #' @param tickers tickers A character vector of stock symbols.
-#' For non-US tickers it is possible to pass specify exchange after tick symbol, separated by comma, i.e. "TICKER:EXCHANGE"
-#' @param tags he specified standardized tag requested.
+#' For non-US tickers it is possible to pass specify exchange after tick symbol, separated by colon, i.e. "TICKER:EXCHANGE"
+#' @param tags specified standardized tag requested.
 #' Entire list of tags is available \href{http://docs.intrinio.com/tags/intrinio-public#historical-data}{here}
 #' @param from History start date (either Date or a character in 'YYYY-MM-DD' format),
 #' If \code{NULL}, date would not be restricted by a minimum.
+#' A vector of dates of the same length as tickers is also possible in order to have specific start date for each ticker.
 #' @param to History end date (either Date or a character in 'YYYY-MM-DD' format),
 #' If \code{NULL}, date would not be restricted by a maximum.
+#' A vector of dates of the same length as tickers is also possible in order to have specific end date for each ticker.
 #' @param freq Data periodicity. A string containing any of
 #' \code{'daily', 'weekly', 'monthly', 'quarterly', 'yearly'}
 #' @param type Meaningful for financial Statements data only. The type of periods requested. Possible values:\cr
@@ -217,9 +219,24 @@ i.historicalData <- function(tickers,
                              type = NULL,
                              ...){
   freq <- match.arg(freq)
+  type <- toupper(type)
   assert_that(is.character(tickers),
               is.character(tags),
               is.string(type),
               type %in% c('FY', 'QTR', 'QTD', 'TTM'))
+
+  reqVector <- CJ(tickers = tickers, tags = tags)
+  if (!is.null(from)) {
+    if (!(is.scalar(from) | length(from) == length(tickers)))
+      stop('"from" must be have either length one or same length as tickers')
+    from <- data.table(tickers = tickers, from = from)
+    reqVector <- from[reqVector, on = 'tickers']
+  }
+
+  if (!is.null(from)) {
+    stopifnot(is.scalar(from) | length(from) == length(tickers))
+    from <- data.table(tickers = tickers, from = from)
+    reqVector <- from[reqVector, on = 'tickers']
+  }
 
 }
