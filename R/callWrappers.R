@@ -195,50 +195,76 @@ i.dataPoint <- function(tickers, tags, ...){
 #' If \code{NULL}, date would not be restricted by a maximum.
 #' A vector of dates of the same length as tickers is also possible in order to have specific end date for each ticker.
 #' @param freq Data periodicity. A string containing any of
-#' \code{'daily', 'weekly', 'monthly', 'quarterly', 'yearly'}
-#' @param type Meaningful for financial Statements data only. The type of periods requested. Possible values:\cr
+#' \code{'daily', 'weekly', 'monthly', 'quarterly', 'yearly'} or \code{NULL}.
+#' If \code{NULL} will preserve default intrinio behavior (daily).
+#' @param type Meaningful for financial Statements data only.
+#' The type of financial statement period. Possible values:\cr
 #' \describe{
 #'   \item{\code{'FY'}}{Fiscal year}
 #'   \item{\code{'QTR'}}{Quarter}
 #'   \item{\code{'YTD'}}{Year-to-date}
 #'   \item{\code{'TTM'}}{Trailing twelve months}
 #' }\cr
+#' \code{NULL} will preserve default intrinio behavior, which is TTM for income statement and
+#' cash flow statement and QTR for balance sheet.
 #' @param ... other arguments to pass to \code{MoreArgs} of \code{intrCallMap}
 #' @details Will download history for all tickers passed for each tag passed.
 #' Please use \code{intrCallMap} to load specific set of tags for the respective ticker.
+#' @note Financials will not work with freq defined, so it is generally not advised to mix market data and financials.
 #' @return Data in specified format. See \code{\link{intrOptions}} for details
 #' @section Data Feed:
 #' \href{https://intrinio.com/data/company-financials}{US Public Company Financials}
-#' @noRd
 #' @examples
 i.historicalData <- function(tickers,
                              tags,
                              from = NULL,
                              to = NULL,
-                             freq = c('daily', 'weekly', 'monthly', 'quarterly', 'yearly'),
+                             freq = NULL,
                              type = NULL,
                              ...){
-  freq <- match.arg(freq)
-  type <- toupper(type)
-  assert_that(is.character(tickers),
-              is.character(tags),
-              is.string(type),
-              type %in% c('FY', 'QTR', 'QTD', 'TTM'))
+  if (!is.null(type)) {
+    assert_that(is.string(type))
+    type <- toupper(type)
+    assert_that(type %in% c('FY', 'QTR', 'QTD', 'TTM'))
+    MoreArgs <- list(type = type)
+  }
 
-  reqVector <- CJ(tickers = tickers, tags = tags)
+  if (!is.null(freq)) {
+    assert_that(is.string(freq))
+    type <- toupper(freq)
+    assert_that(type %in% c('daily', 'weekly', 'monthly', 'quarterly', 'yearly'))
+    MoreArgs <- c(MoreArgs, list(freq = freq))
+  }
+
+  MoreArgs <- c(MoreArgs, list(...))
+  if (length(MoreArgs) == 0) MoreArgs <- NULL
+
+  assert_that(is.character(tickers), is.character(tags))
+
+  reqList <- CJ(identifier = tickers, item = tags)
   if (!is.null(from)) {
     if (!(is.scalar(from) || length(from) == length(tickers)))
       stop('"from" must either have length one or the same length as tickers')
-    from <- data.table(tickers = tickers, from = as.character(as.Date(from)))
-    reqVector <- from[reqVector, on = 'tickers']
+    from <- data.table(identifier = tickers, start_date = as.character(as.Date(from)))
+    reqList <- from[reqList, on = 'identifier']
   }
 
-  if (!is.null(from)) {
+  if (!is.null(to)) {
     if (!(is.scalar(to) || length(to) == length(tickers)))
       stop('"to" must either have length one or the same length as tickers')
-    from <- data.table(tickers = tickers, to = to)
-    reqVector <- to[reqVector, on = 'tickers']
+    to <- data.table(identifier = tickers, end_date = as.character(as.Date(to)))
+    reqList <- to[reqList, on = 'identifier']
   }
-  MoreArgs <- list(type)
-
+  res <- do.call(intrCallMap, args = c(
+    reqList,
+    list(
+      endpoint = 'historical_data',
+      idCols = TRUE,
+      MoreArgs = MoreArgs
+    )))
+  suppressWarnings({
+    res$start_date <- NULL
+    res$end_date <- NULL
+  })
+  res
 }
