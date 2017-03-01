@@ -232,8 +232,7 @@ i.historicalData <- function(tickers,
 
   if (!is.null(freq)) {
     assert_that(is.string(freq))
-    type <- toupper(freq)
-    assert_that(type %in% c('daily', 'weekly', 'monthly', 'quarterly', 'yearly'))
+    assert_that(freq %in% c('daily', 'weekly', 'monthly', 'quarterly', 'yearly'))
     MoreArgs <- c(MoreArgs, list(freq = freq))
   }
 
