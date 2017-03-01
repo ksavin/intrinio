@@ -266,6 +266,7 @@ i.historicalData <- function(tickers,
   suppressWarnings({
     res$start_date <- NULL
     res$end_date <- NULL
+    res$date <- as.Date(res$date)
   })
   res
 }
