@@ -222,6 +222,7 @@ i.historicalData <- function(tickers,
                              freq = NULL,
                              type = NULL,
                              ...){
+  MoreArgs <- list()
   if (!is.null(type)) {
     assert_that(is.string(type))
     type <- toupper(type)
