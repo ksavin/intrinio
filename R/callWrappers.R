@@ -227,16 +227,18 @@ i.historicalData <- function(tickers,
 
   reqVector <- CJ(tickers = tickers, tags = tags)
   if (!is.null(from)) {
-    if (!(is.scalar(from) | length(from) == length(tickers)))
-      stop('"from" must be have either length one or same length as tickers')
-    from <- data.table(tickers = tickers, from = from)
+    if (!(is.scalar(from) || length(from) == length(tickers)))
+      stop('"from" must either have length one or the same length as tickers')
+    from <- data.table(tickers = tickers, from = as.character(as.Date(from)))
     reqVector <- from[reqVector, on = 'tickers']
   }
 
   if (!is.null(from)) {
-    stopifnot(is.scalar(from) | length(from) == length(tickers))
-    from <- data.table(tickers = tickers, from = from)
-    reqVector <- from[reqVector, on = 'tickers']
+    if (!(is.scalar(to) || length(to) == length(tickers)))
+      stop('"to" must either have length one or the same length as tickers')
+    from <- data.table(tickers = tickers, to = to)
+    reqVector <- to[reqVector, on = 'tickers']
   }
+  MoreArgs <- list(type)
 
 }
