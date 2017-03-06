@@ -185,7 +185,7 @@ i.dataPoint <- function(tickers, tags, ...){
 #' Historical data
 #'
 #' @param tickers tickers A character vector of stock symbols.
-#' For non-US tickers it is possible to pass specify exchange after tick symbol, separated by colon, i.e. "TICKER:EXCHANGE"
+#' For non-US tickers it is possible to specify exchange after tick symbol, separated by colon, i.e. "TICKER:EXCHANGE"
 #' @param tags specified standardized tag requested.
 #' Entire list of tags is available \href{http://docs.intrinio.com/tags/intrinio-public#historical-data}{here}
 #' @param from History start date (either Date or a character in 'YYYY-MM-DD' format),
@@ -211,6 +211,8 @@ i.dataPoint <- function(tickers, tags, ...){
 #' @details Will download history for all tickers passed for each tag passed.
 #' Please use \code{intrCallMap} to load specific set of tags for the respective ticker.
 #' @note Financials will not work with freq defined, so it is generally not advised to mix market data and financials.
+#' It is also more cost-effective in terms of API calls to request market data history with i.prices
+#' since it loads OHLC, volume, splits, dividends and adjusted prices at once.
 #' @return Data in specified format. See \code{\link{intrOptions}} for details
 #' @section Data Feed:
 #' \href{https://intrinio.com/data/company-financials}{US Public Company Financials}
@@ -268,4 +270,43 @@ i.historicalData <- function(tickers,
     res$date <- as.Date(res$date)
   })
   res
+}
+
+#' Requests market data history (OHLC, volumes, dividends, etc.)
+#' @description Using \code{prices} endpoint downloads data for a subset of
+#' tags, allowed by \link{\code{i.historicalData}}. However, it loads multiple
+#' tags with a single call, which allows spending less API credits.
+#' @param tickers tickers A character vector of stock symbols.
+#' For non-US tickers it is possible to specify exchange after tick symbol, separated by colon, i.e. "TICKER:EXCHANGE"
+#' @param from History start date (either Date or a character in 'YYYY-MM-DD' format),
+#' If \code{NULL}, date would not be restricted by a minimum.
+#' A vector of dates of the same length as tickers is also possible in order to have specific start date for each ticker.
+#' @param to History end date (either Date or a character in 'YYYY-MM-DD' format),
+#' If \code{NULL}, date would not be restricted by a maximum.
+#' A vector of dates of the same length as tickers is also possible in order to have specific end date for each ticker.
+#' @param freq Data periodicity. A string containing any of
+#' \code{'daily', 'weekly', 'monthly', 'quarterly', 'yearly'} or \code{NULL}.
+#' If \code{NULL} will preserve default intrinio behavior (daily).
+#'
+#' @return Data in specified format. See \code{\link{intrOptions}} for details. Columns: \cr
+#' \describe{
+#' 	\item{\code{ticker}}{Security identifier}
+#' 	\item{\code{date}}{Price date}
+#' 	\item{\code{open}}{The actual observed first traded stock price on the trading date}
+#' 	\item{\code{high}}{The actual observed highest traded stock price on the trading date}
+#' 	\item{\code{low}}{The actual observed lowest traded stock price on the trading date}
+#' 	\item{\code{close}}{The actual observed last trade stock price on the trading date}
+#' 	\item{\code{volume}}{The actual observed number of shares of stock traded between market participants on the trading date}
+#' 	\item{\code{ex_dividend}}{The non-split adjusted dividend per share on the ex-dividend date - not available on index historical prices}
+#' 	\item{\code{split_ratio}}{The split factor on the split date - not available on index historical prices}
+#' 	\item{\code{adj_open}}{The dividend and split adjusted open price - not available on index historical prices}
+#' 	\item{\code{adj_high}}{The dividend and split adjusted high price - not available on index historical prices}
+#' 	\item{\code{adj_low}}{The dividend and split adjusted low price - not available on index historical prices}
+#' 	\item{\code{adj_close}}{The dividend and split adjusted close price - not available on index historical prices}
+#' 	\item{\code{adj_volume}}{The dividend and split adjusted volume - not available on index historical prices}
+#' }\cr
+#' @examples
+#' @noRd
+i.prices <- function(tickers, from = NULL, to = NULL, freq = 'daily', ...) {
+
 }

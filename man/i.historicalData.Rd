@@ -9,7 +9,7 @@ i.historicalData(tickers, tags, from = NULL, to = NULL, freq = NULL,
 }
 \arguments{
 \item{tickers}{tickers A character vector of stock symbols.
-For non-US tickers it is possible to pass specify exchange after tick symbol, separated by colon, i.e. "TICKER:EXCHANGE"}
+For non-US tickers it is possible to specify exchange after tick symbol, separated by colon, i.e. "TICKER:EXCHANGE"}
 
 \item{tags}{specified standardized tag requested.
 Entire list of tags is available \href{http://docs.intrinio.com/tags/intrinio-public#historical-data}{here}}
@@ -51,6 +51,8 @@ Please use \code{intrCallMap} to load specific set of tags for the respective ti
 }
 \note{
 Financials will not work with freq defined, so it is generally not advised to mix market data and financials.
+It is also more cost-effective in terms of API calls to request market data history with i.prices
+since it loads OHLC, volume, splits, dividends and adjusted prices at once.
 }
 \section{Data Feed}{
 
