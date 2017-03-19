@@ -285,9 +285,7 @@ i.historicalData <- function(tickers,
 #' If \code{NULL}, date would not be restricted by a maximum.
 #' A vector of dates of the same length as tickers is also possible in order to have specific end date for each ticker.
 #' @param freq Data periodicity. A string containing any of
-#' \code{'daily', 'weekly', 'monthly', 'quarterly', 'yearly'} or \code{NULL}.
-#' If \code{NULL} will preserve default intrinio behavior (daily).
-#'
+#' \code{'daily', 'weekly', 'monthly', 'quarterly', 'yearly'} or \code{NULL}. \code{NULL} will preserve default intrinio behavior (daily).
 #' @return Data in specified format. See \code{\link{intrOptions}} for details. Columns: \cr
 #' \describe{
 #' 	\item{\code{ticker}}{Security identifier}
@@ -303,10 +301,45 @@ i.historicalData <- function(tickers,
 #' 	\item{\code{adj_high}}{The dividend and split adjusted high price - not available on index historical prices}
 #' 	\item{\code{adj_low}}{The dividend and split adjusted low price - not available on index historical prices}
 #' 	\item{\code{adj_close}}{The dividend and split adjusted close price - not available on index historical prices}
-#' 	\item{\code{adj_volume}}{The dividend and split adjusted volume - not available on index historical prices}
-#' }\cr
-#' @examples
-#' @noRd
+#' 	\item{\code{adj_volume}}{The dividend and split adjusted volume - not available on index historical prices}}
 i.prices <- function(tickers, from = NULL, to = NULL, freq = 'daily', ...) {
+  MoreArgs <- list()
+  if (!is.null(freq)) {
+    assert_that(is.string(freq))
+    assert_that(freq %in% c('daily', 'weekly', 'monthly', 'quarterly', 'yearly'))
+    MoreArgs <- c(MoreArgs, list(freq = freq))
+  }
 
+  MoreArgs <- c(MoreArgs, list(...))
+  if (length(MoreArgs) == 0) MoreArgs <- NULL
+
+  assert_that(is.character(tickers))
+  reqList <- data.table(identifier = tickers)
+
+   if (!is.null(from)) {
+    if (!(is.scalar(from) || length(from) == length(tickers)))
+      stop('"from" must either have length one or the same length as tickers')
+    from <- data.table(identifier = tickers, start_date = as.character(as.Date(from)))
+    reqList <- from[reqList, on = 'identifier']
+  }
+
+  if (!is.null(to)) {
+    if (!(is.scalar(to) || length(to) == length(tickers)))
+      stop('"to" must either have length one or the same length as tickers')
+    to <- data.table(identifier = tickers, end_date = as.character(as.Date(to)))
+    reqList <- to[reqList, on = 'identifier']
+  }
+  res <- do.call(intrCallMap, args = c(
+    reqList,
+    list(
+      endpoint = 'prices',
+      idCols = TRUE,
+      MoreArgs = MoreArgs
+    )))
+  suppressWarnings({
+    res$start_date <- NULL
+    res$end_date <- NULL
+    res$date <- as.Date(res$date)
+  })
+  res
 }

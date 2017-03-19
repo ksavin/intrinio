@@ -8,6 +8,7 @@ export(i.companies)
 export(i.indices)
 export(i.secScreener)
 export(i.historicalData)
+export(i.prices)
 
 importFrom(httr, modify_url)
 importFrom(httr, VERB)
