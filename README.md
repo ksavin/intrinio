@@ -1,8 +1,6 @@
 # intrinio
 
-Unofficial wrapper around [Intrinio Web API](intrinio.com) RESTful API. Service allows downloading financial statements, standardized EDGAR reports, historical market data, marcoeconomics statistics and more.
-
-*The package is in early development, breaking changes are possible.*
+Unofficial wrapper around [Intrinio Web API](https://intrinio.com/) RESTful API. Service allows downloading financial statements, standardized EDGAR reports, historical market data, marcoeconomics statistics and more.
 
 ## Installation
 ```r
