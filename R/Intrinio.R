@@ -8,7 +8,7 @@ intr_call_l <- function(endpoint, ...) {
   response <- VERB(
     'GET', 
     link, 
-    add_headers(Authorization = paste0('Bearer ', cred$key))
+    httr::add_headers(Authorization = paste0('Bearer ', cred$key))
   )
   code <- response$status_code
 
