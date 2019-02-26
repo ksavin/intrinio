@@ -72,7 +72,7 @@ intrCall <- function(endpoint,
   withRestarts(
     {
       res <- intr_call_l(endpoint, page_size = pageSize, page_number = startPage, ...)
-
+      Sys.sleep(1)
       if (is.null(res$total_pages)) return(as.data.table(res))
       if (is.null(endPage)) endPage <- res$total_pages
       if (endPage <= startPage) return(as.data.table(res$data))
