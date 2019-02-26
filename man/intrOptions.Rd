@@ -49,4 +49,3 @@ intrOptions()
 # modify options
 intrOptions(verbose = TRUE, costWarning = FALSE)
 }
-

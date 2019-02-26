@@ -41,7 +41,6 @@ Data in specified format. See \code{\link{intrOptions}} for details. Columns: \c
 }
 \description{
 Using \code{prices} endpoint downloads data for a subset of
-tags, allowed by \link{\code{i.historicalData}}. However, it loads multiple
+tags, allowed by \code{\link{i.historicalData}}. However, it loads multiple
 tags with a single call, which allows spending less API credits.
 }
-

@@ -26,6 +26,7 @@ such as hq address, phone number, industry sector, SEC cik number etc.
 
 {https://intrinio.com/data/company-financials}{US Public Company Financials}
 }
+
 \examples{
 \dontrun{
 i.companies()
@@ -35,4 +36,3 @@ i.companies(c('MSFT', 'AAPL'))
 \seealso{
 \href{http://docs.intrinio.com/#companies}{Companies API documentation}.
 }
-

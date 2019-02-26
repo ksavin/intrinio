@@ -27,6 +27,7 @@ such as country, continent, full name and type.
 
 \href{https://intrinio.com/data/company-security-master}{Global Public Company Security Master}
 }
+
 \examples{
 \dontrun{
 i.indices() # over 1000 API calls
@@ -37,4 +38,3 @@ i.indices(type = 'stock_market')
 \seealso{
 \href{http://docs.intrinio.com/#indices58}{Indices API documentation}.
 }
-

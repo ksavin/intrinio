@@ -4,27 +4,25 @@
 \alias{intrAuth}
 \title{Authorize Web API access}
 \usage{
-intrAuth(user, pass)
+intrAuth(key)
 }
 \arguments{
-\item{user}{A string containing \code{API_USERNAME}}
-
-\item{pass}{A string containing \code{API_PASSWORD}}
+\item{Key}{A string containing \code{API_KEY}}
 }
 \value{
-a list with credentials if user and password are not passed.
+a list with credentials if key is not passed.
 }
 \description{
-The Intrinio API uses Basic Authentication over HTTPS.
-You can find your \code{API_USERNAME} and \code{API_PASSWORD} on your User Admin Dashboard of the site.\cr
+The Intrinio API either passes key with link over HTTPS or
+via Authorization header. The latter is used in this package.
+You can find your \code{API_KEY} in your user account on the website.\cr
 \code{intrAuth} simply stores your credentials in \code{intrinio_globals} environment for future use.
 Credentials need to be specified on every package reload.
 }
 \examples{
-intrAuth('a543b029ec335ddfw66dd95bfa1ea3ac', '991d8ca963fgaa357aef78b4784d88b0')
+intrAuth('a543b029ec335ddfw66dd95bfa1ea3ac')
 intrAuth()
 }
 \seealso{
 \href{http://blog.intrinio.com/getting-started-with-intrinio/}{Getting Started article}
 }
-

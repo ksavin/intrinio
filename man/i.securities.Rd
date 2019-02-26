@@ -27,6 +27,7 @@ Passing a vector of tickers will return more detailed data on securities
 
 \href{https://intrinio.com/data/company-security-master}{Global Public Company Security Master}
 }
+
 \examples{
 \dontrun{
 i.securities() #Over 500 API calls
@@ -36,4 +37,3 @@ i.securities(tickers = c('AAPL', 'MSFT'))
 \seealso{
 \href{http://docs.intrinio.com/#securities}{Securities API documentation}.
 }
-

@@ -5,7 +5,11 @@ intr_call_l <- function(endpoint, ...) {
   link <- modify_url(base_url(), path = endpoint, query = list(...))
   if (intrOptions()$verbose) statusMsg('Requesting:', link)
   cred <- intrAuth()
-  response <- VERB('GET', link, authenticate(cred$user, cred$pass, type = 'basic'))
+  response <- VERB(
+    'GET', 
+    link, 
+    add_headers(Authorization = paste0('Bearer ', cred$key))
+  )
   code <- response$status_code
 
   if (code != 200) {
@@ -203,31 +207,29 @@ intrCallMap <- function(endpoint, pageSize = 'auto', idCols = TRUE, ..., MoreArg
 }
 
 #' @title Authorize Web API access
-#' @param user A string containing \code{API_USERNAME}
-#' @param pass A string containing \code{API_PASSWORD}
-#' @description The Intrinio API uses Basic Authentication over HTTPS.
-#' You can find your \code{API_USERNAME} and \code{API_PASSWORD} on your User Admin Dashboard of the site.\cr
+#' @param Key A string containing \code{API_KEY}
+#' @description The Intrinio API either passes key with link over HTTPS or
+#' via Authorization header. The latter is used in this package.
+#' You can find your \code{API_KEY} in your user account on the website.\cr
 #' \code{intrAuth} simply stores your credentials in \code{intrinio_globals} environment for future use.
 #' Credentials need to be specified on every package reload.
 #' @seealso \href{http://blog.intrinio.com/getting-started-with-intrinio/}{Getting Started article}
 #'
-#' @return a list with credentials if user and password are not passed.
+#' @return a list with credentials if key is not passed.
 #' @examples
-#' intrAuth('a543b029ec335ddfw66dd95bfa1ea3ac', '991d8ca963fgaa357aef78b4784d88b0')
+#' intrAuth('a543b029ec335ddfw66dd95bfa1ea3ac')
 #' intrAuth()
-intrAuth <- function(user, pass){
-  if (!missing(user) && !missing(pass)) {
-    assign('intrinio.user', user, envir = intrinio_globals)
-    assign('intrinio.pass', pass, envir = intrinio_globals)
-  } else if (missing(user) && missing(pass)) {
+intrAuth <- function(key){
+  if (!missing(key)) {
+    assign('intrinio.key', key, envir = intrinio_globals)
+  } else {
     return(
       tryCatch(
-        list(user = get('intrinio.user', intrinio_globals),
-             pass = get('intrinio.pass', intrinio_globals)),
-        error = function(e) stop('Not authorized. Run intrAuth() with your credentials.')
+        list(key = get('intrinio.key', intrinio_globals)),
+        error = function(e) stop('Not authorized. Run intrAuth() with your key.')
       )
     )
-  } else stop('Specify either user-pass pair or neither.')
+  } 
 }
 
 #' Gets or sets Intrinio package options

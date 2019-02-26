@@ -30,4 +30,3 @@ intrCall('companies') # Pulls Master Data Feed (first page).
 intrCall('companies', identifier = 'AAPL')
 intrCall('fundamentals/standardized', identifier = 'AAPL', statement = 'income_statement', type = 'FY')
 }
-

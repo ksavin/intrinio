@@ -27,4 +27,3 @@ Elements of MoreArgs must be vectors of length 1}
 Use if needed to load data that requires multiple requests, such as data for multiple securities.
 Each request can be multipage
 }
-

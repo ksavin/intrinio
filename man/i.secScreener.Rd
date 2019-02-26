@@ -40,6 +40,7 @@ Left-hand side is not evaluated.
 
 {https://intrinio.com/data/company-financials}{US Public Company Financials}
 }
+
 \examples{
 #' \dontrun{
 i.secScreener(open_price >= 10.50, pricetoearnings > 10)
@@ -52,4 +53,3 @@ sq <- 100
 i.secScreener(open_price >= a + b, pricetoearnings > sqrt(sq))
 }
 }
-

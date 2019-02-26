@@ -274,7 +274,7 @@ i.historicalData <- function(tickers,
 
 #' Requests market data history (OHLC, volumes, dividends, etc.)
 #' @description Using \code{prices} endpoint downloads data for a subset of
-#' tags, allowed by \link{\code{i.historicalData}}. However, it loads multiple
+#' tags, allowed by \code{\link{i.historicalData}}. However, it loads multiple
 #' tags with a single call, which allows spending less API credits.
 #' @param tickers tickers A character vector of stock symbols.
 #' For non-US tickers it is possible to specify exchange after tick symbol, separated by colon, i.e. "TICKER:EXCHANGE"
